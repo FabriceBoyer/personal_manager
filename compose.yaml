@@ -1,0 +1,23 @@
+services:
+  memoire:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: personal-manager:local
+    container_name: memoire
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8088}:8080"
+    environment:
+      PORT: "8080"
+    volumes:
+      - memoire-data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/api/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  memoire-data:
