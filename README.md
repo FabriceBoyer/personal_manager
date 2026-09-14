@@ -10,6 +10,7 @@ Mémoire rassemble dans un registre unique les actions à venir, rendez-vous, r�
 - Journal des actions effectuées avec dates, résultats et commentaires.
 - Base de connaissances structurée en sujet, relation et valeur.
 - Relations validées entre tous les objets via leurs identifiants.
+- Fiche détaillée accessible en cliquant sur n'importe quelle entité.
 - Calendrier mensuel dérivé de tout objet daté et recherche globale.
 - Interface responsive, colorée, animée et respectueuse de `prefers-reduced-motion`.
 - Thème clair/sombre automatique suivant le système, avec choix manuel mémorisé.
@@ -71,16 +72,16 @@ npm run dev -- --host 0.0.0.0
 
 ## Utilisation
 
-### Identifiants uniques
+### Identifiants uniques automatiques
 
-Chaque objet exige un identifiant explicite, stable et immuable. Le format accepte un préfixe suivi de un à trois segments :
+Le backend attribue automatiquement à chaque nouvel objet un identifiant stable et immuable. La génération est effectuée sous verrou afin que deux créations simultanées ne puissent pas recevoir le même identifiant :
 
 - `ACT-2026-001` pour une action ;
 - `RDV-DENTISTE` pour un rendez-vous ;
 - `JRN-2026-042` pour une entrée de journal ;
 - `PER-MARIE` ou `LIE-CABINET` pour une connaissance.
 
-Un identifiant déjà utilisé provoque une réponse HTTP `409 Conflict`. Les relations vers un identifiant inexistant sont également rejetées. Cette contrainte est le mécanisme central de déduplication.
+L'API continue d'accepter un identifiant explicite pour les imports et intégrations. Un identifiant déjà utilisé provoque une réponse HTTP `409 Conflict`. Les relations vers un identifiant inexistant sont également rejetées. Ces contraintes forment le mécanisme central de déduplication.
 
 ### Thème et langue
 
@@ -134,7 +135,7 @@ Exemple :
 ```bash
 curl -X POST http://localhost:8088/api/records \
   -H 'Content-Type: application/json' \
-  -d '{"id":"ACT-2026-002","kind":"action","title":"Réserver le train","status":"active","date":"2026-09-20T10:00","tags":["voyage"],"relatedIds":["PER-MARIE"]}'
+  -d '{"kind":"action","title":"Réserver le train","status":"active","date":"2026-09-20T10:00","tags":["voyage"],"relatedIds":["PER-MARIE"]}'
 ```
 
 Les écritures sont sérialisées par un verrou, sauvegardées dans un fichier temporaire puis renommées atomiquement. L'API n'implémente actuellement ni authentification, ni pagination, ni limitation de débit : elle doit être exposée uniquement sur un réseau de confiance.

@@ -110,14 +110,17 @@ func (s *Store) create(r Record) (Record, error) {
 	defer s.mu.Unlock()
 	r.ID = strings.ToUpper(strings.TrimSpace(r.ID))
 	r.Title = strings.TrimSpace(r.Title)
+	if !validKinds[r.Kind] {
+		return r, fmt.Errorf("type d’objet invalide")
+	}
+	if r.ID == "" {
+		r.ID = s.nextIDLocked(r.Kind)
+	}
 	if !idPattern.MatchString(r.ID) {
 		return r, fmt.Errorf("l’identifiant doit suivre le format TYPE-IDENTIFIANT (ex. ACT-2026-001)")
 	}
 	if _, exists := s.records[r.ID]; exists {
 		return r, fmt.Errorf("l’identifiant %s existe déjà", r.ID)
-	}
-	if !validKinds[r.Kind] {
-		return r, fmt.Errorf("type d’objet invalide")
 	}
 	if r.Title == "" {
 		return r, fmt.Errorf("le titre est obligatoire")
@@ -139,6 +142,17 @@ func (s *Store) create(r Record) (Record, error) {
 		return r, err
 	}
 	return r, nil
+}
+
+func (s *Store) nextIDLocked(kind string) string {
+	prefixes := map[string]string{"action": "ACT", "event": "RDV", "journal": "JRN", "fact": "FCT"}
+	base := fmt.Sprintf("%s-%d", prefixes[kind], time.Now().Year())
+	for sequence := 1; ; sequence++ {
+		candidate := fmt.Sprintf("%s-%03d", base, sequence)
+		if _, exists := s.records[candidate]; !exists {
+			return candidate
+		}
+	}
 }
 
 func (s *Store) update(id string, patch Record) (Record, error) {
