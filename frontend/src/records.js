@@ -42,6 +42,16 @@ export async function updateRecord(id, changes) {
   return fromRow(data);
 }
 
+export async function resetRecords() {
+  const {data: {user}, error: authError} = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!user) throw new Error('Session expirée. Reconnectez-vous.');
+  const {error} = await supabase.from('records').delete().eq('owner_id', user.id);
+  if (error) throw error;
+  const remaining = await listRecords();
+  if (remaining.length) throw new Error('La réinitialisation est incomplète. Réessayez.');
+}
+
 // Import older records after signing in. Links are applied after all records exist.
 export async function importRecords(items) {
   if (!Array.isArray(items) || items.some(item => !item.id || !item.kind || !item.title)) {
