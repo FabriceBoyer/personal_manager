@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run build:pages
-      - run: rg '/personal_manager/assets/' dist/index.html
+      - run: grep -q '/personal_manager/assets/' dist/index.html
 
   container:
     name: Container build and smoke test
