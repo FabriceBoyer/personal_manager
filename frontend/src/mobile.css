@@ -1,0 +1,16 @@
+@media(max-width:1150px){body{min-width:0}.search{min-width:0}}
+@media(max-width:800px){
+  aside{height:calc(68px + env(safe-area-inset-bottom));padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+  nav{grid-template-columns:repeat(6,minmax(0,1fr));gap:0}
+  nav button{min-width:0;padding:5px 2px;font-size:9px;align-items:center;justify-content:center}
+  nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  main{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+  header{gap:8px}.headerActions{flex-shrink:0}.search input{min-width:0}
+  .pageTitle{min-width:0}.pageTitle h1{overflow-wrap:anywhere}
+  .overlay{padding:12px}.modal,.detailModal{max-width:100%;max-height:calc(100dvh - 24px)}
+}
+@media(max-width:390px){
+  header{padding:0 10px}.headerActions{gap:4px}.search{gap:5px}
+  nav button span{font-size:8px}.recordCard{min-width:0}
+  .calendarCard{overflow-x:auto}.weekdays,.monthGrid{min-width:294px}
+}

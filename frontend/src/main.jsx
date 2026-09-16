@@ -6,6 +6,7 @@ import {createRecord, importRecords, listRecords, updateRecord} from './records'
 import './styles.css';
 import './theme.css';
 import './auth.css';
+import './mobile.css';
 
 const kindMeta = {
   action: {label:'Action', icon:ListTodo, color:'coral'},
@@ -51,7 +52,7 @@ function App(){
   return <div className="app">
     <aside>
       <div className="brand"><div className="brandMark"><Sparkles size={19}/></div><div><b>Mémoire</b><span>personal OS</span></div></div>
-      <nav>{nav.map(([id,label,Icon])=><button key={id} className={view===id?'active':''} onClick={()=>setView(id)}><Icon size={19}/><span>{tr(locale,label)}</span>{id==='actions'&&<em>{records.filter(r=>r.kind==='action'&&r.status!=='done').length}</em>}</button>)}</nav>
+      <nav>{nav.map(([id,label,Icon])=><button key={id} aria-label={tr(locale,label)} className={view===id?'active':''} onClick={()=>setView(id)}><Icon size={19}/><span>{tr(locale,label)}</span>{id==='actions'&&<em>{records.filter(r=>r.kind==='action'&&r.status!=='done').length}</em>}</button>)}</nav>
       <div className="sideFoot"><div className="sync"><i></i><span><b>{error?(locale==='fr'?'Erreur de synchronisation':'Sync error'):tr(locale,'sync')}</b><small>{error||tr(locale,'now')}</small></span></div><button className="profile" onClick={()=>supabase.auth.signOut()} title={locale==='fr'?'Se déconnecter':'Sign out'}><span>{session.user.email?.slice(0,2).toUpperCase()}</span><div><b>{session.user.email}</b><small>{locale==='fr'?'Se déconnecter':'Sign out'}</small></div></button></div>
     </aside>
     <main>
@@ -72,7 +73,7 @@ function AuthScreen({locale,setLocale}){
   const [email,setEmail]=useState(''),[password,setPassword]=useState(''),[signUp,setSignUp]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false);
   const submit=async e=>{
     e.preventDefault();setBusy(true);setError('');setNotice('');
-    const {data,error:authError}=signUp?await supabase.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin}}):await supabase.auth.signInWithPassword({email,password});
+    const {data,error:authError}=signUp?await supabase.auth.signUp({email,password,options:{emailRedirectTo:new URL(import.meta.env.BASE_URL,window.location.origin).href}}):await supabase.auth.signInWithPassword({email,password});
     setBusy(false);
     if(authError){setError(authError.message);return}
     if(signUp&&!data.session) setNotice(fr?'Vérifiez votre courriel pour confirmer le compte.':'Check your email to confirm your account.');

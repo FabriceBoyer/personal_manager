@@ -12,7 +12,7 @@ npm ci
 npm run dev
 ```
 
-Ouvrez l'adresse affichée par Vite, créez un compte ou connectez-vous. Selon la configuration Auth du projet Supabase, la création d'un compte peut nécessiter une confirmation par courriel. Si le lien de confirmation doit revenir à votre déploiement, ajoutez son origine dans **Authentication → URL Configuration → Redirect URLs** du tableau de bord Supabase. Le schéma requis est dans `supabase/migrations/20260916195312_create_records.sql` et a été appliqué au projet Supabase.
+Ouvrez l'adresse affichée par Vite, créez un compte ou connectez-vous. Selon la configuration Auth du projet Supabase, la création d'un compte peut nécessiter une confirmation par courriel. Le schéma requis est dans `supabase/migrations/20260916195312_create_records.sql` et a été appliqué au projet Supabase.
 
 Pour utiliser un autre projet Supabase, créez `frontend/.env.local` :
 
@@ -22,6 +22,12 @@ VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 ```
 
 Appliquez aussi la migration SQL à cet autre projet. N'utilisez jamais une clé `service_role` ou `sb_secret_` dans une variable `VITE_`.
+
+## GitHub Pages
+
+La version publiée se trouve à <https://fabriceboyer.github.io/personal_manager/>. Le workflow [CI](.github/workflows/ci.yml) vérifie les builds React, GitHub Pages et Docker ; après un push sur `main`, il publie `frontend/dist` si les contrôles passent. Le dépôt est déjà configuré pour publier via GitHub Actions. Le build Pages utilise le préfixe `/personal_manager/`, tandis que le build Docker garde `/`.
+
+Pour que les liens de confirmation Supabase reviennent à l'application, définissez **Site URL** sur `https://fabriceboyer.github.io/personal_manager/` et ajoutez la même adresse dans **Authentication → URL Configuration → Redirect URLs** du projet Supabase. Le frontend utilise automatiquement cette URL lors de l'inscription sur Pages.
 
 ## Docker Compose
 
@@ -43,6 +49,7 @@ La clé publishable et l'URL Supabase sont visibles par les utilisateurs du navi
 
 ```bash
 cd frontend && npm ci && npm run build
+cd frontend && npm run build:pages
 docker compose config
 docker build -t personal-manager:test .
 ```
