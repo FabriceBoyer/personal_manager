@@ -35,8 +35,8 @@ export async function createRecord(record) {
 }
 
 export async function updateRecord(id, changes) {
-  const patch = {};
-  if (changes.status !== undefined) patch.status = changes.status;
+  const columns = {kind:'kind',title:'title',description:'description',status:'status',date:'date',endDate:'end_date',subject:'subject',predicate:'predicate',value:'value',tags:'tags',relatedIds:'related_ids'};
+  const patch = Object.fromEntries(Object.entries(columns).filter(([key])=>changes[key]!==undefined).map(([key,column])=>[column,changes[key]||(['tags','relatedIds'].includes(key)?[]:['date','endDate'].includes(key)?null:'')]));
   const {data, error} = await supabase.from('records').update(patch).eq('id', id).select().single();
   if (error) throw error;
   return fromRow(data);

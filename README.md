@@ -29,6 +29,19 @@ La version publiée se trouve à <https://fabriceboyer.github.io/personal_manage
 
 Pour que les liens de confirmation Supabase reviennent à l'application, définissez **Site URL** sur `https://fabriceboyer.github.io/personal_manager/` et ajoutez la même adresse dans **Authentication → URL Configuration → Redirect URLs** du projet Supabase. Le frontend utilise automatiquement cette URL lors de l'inscription sur Pages.
 
+### Connexion GitHub
+
+1. Créez une [OAuth App GitHub](https://github.com/settings/applications/new) avec `https://fabriceboyer.github.io/personal_manager/` comme **Homepage URL**.
+2. Utilisez `https://ilqgjfzpyclswoowdlte.supabase.co/auth/v1/callback` comme **Authorization callback URL**.
+3. Dans Supabase, ouvrez **Authentication → Sign In / Providers → GitHub**, activez le fournisseur puis saisissez le Client ID et le Client Secret GitHub.
+4. Dans **Authentication → URL Configuration**, conservez `https://fabriceboyer.github.io/personal_manager/` dans les Redirect URLs. Pour le développement, ajoutez aussi `http://localhost:5173/`.
+
+Le Client Secret reste uniquement dans Supabase et ne doit jamais être ajouté au dépôt ou au frontend.
+
+### Installation mobile
+
+Le site est une PWA installable. Sur Android et les navigateurs Chromium, ouvrez **Aide → Installer Mémoire** lorsque le bouton est proposé. Sur iPhone ou iPad, ouvrez le menu **Partager**, puis choisissez **Sur l’écran d’accueil**.
+
 ## Docker Compose
 
 ```bash
@@ -39,7 +52,7 @@ L'application est disponible sur <http://localhost:8088>. `APP_PORT=9000 docker 
 
 ## Données et migration depuis Go
 
-La table `public.records` stocke les quatre catégories dans la même structure. Les identifiants lisibles sont générés dans PostgreSQL pour chaque compte, de façon sûre lors de créations concurrentes. Une contrainte empêche les doublons et un déclencheur vérifie que les relations pointent vers des objets du même compte. Les politiques RLS contrôlent lecture, création et modification. L'application ne propose pas de suppression.
+La table `public.records` stocke les quatre catégories dans la même structure. Les identifiants lisibles sont générés dans PostgreSQL pour chaque compte, de façon sûre lors de créations concurrentes. Une contrainte empêche les doublons et un déclencheur vérifie que les relations pointent vers des objets du même compte. Les politiques RLS contrôlent lecture, création, modification et suppression limitée au compte connecté. Une entité existante peut être ouverte puis modifiée avec le bouton crayon.
 
 Si vous avez utilisé l'ancien backend Go, gardez une copie de `data/records.json`. Après connexion, ouvrez **Aide → Importer vos anciennes données** et sélectionnez ce fichier. Les objets portant un identifiant déjà présent sont ignorés ; les relations sont restaurées après l'import des objets. Le fichier local reste intact.
 
