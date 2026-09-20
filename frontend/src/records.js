@@ -42,6 +42,21 @@ async function enqueue(ownerId, id, patch) {
   return versions;
 }
 
+async function mergeRemote(change) {
+  const {data,error}=await supabase.rpc('merge_record',{p_record:toRow({id:change.id,...change.patch}),p_versions:change.versions});
+  if(!error)return data;
+  const missingRpc=error.code==='PGRST202'||error.message?.includes('merge_record');
+  if(!missingRpc)throw error;
+  const {data:existing,error:lookupError}=await supabase.from('records').select('id').eq('id',change.id).maybeSingle();
+  if(lookupError)throw lookupError;
+  const request=existing
+    ? supabase.from('records').update(toRow(change.patch)).eq('id',change.id)
+    : supabase.from('records').insert(toRow({id:change.id,...change.patch}));
+  const {data:fallback,error:fallbackError}=await request.select().single();
+  if(fallbackError)throw fallbackError;
+  return fallback;
+}
+
 export async function syncPendingRecords() {
   const user = await currentUser();
   if (!navigator.onLine) {
@@ -53,8 +68,8 @@ export async function syncPendingRecords() {
   notify({status:'syncing',pending:pending.length});
   for (let index=0; index<pending.length; index++) {
     const change = pending[index];
-    const {data,error} = await supabase.rpc('merge_record', {p_record:toRow({id:change.id,...change.patch}),p_versions:change.versions});
-    if (error) {
+    let data;
+    try {data=await mergeRemote(change)} catch (error) {
       notify({status:'error',pending:pending.length-index,message:error.message});
       throw error;
     }

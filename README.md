@@ -48,7 +48,7 @@ Les objets sont conservés dans IndexedDB sur chaque appareil. Une modification 
 
 La fusion utilise un registre LWW par champ : chaque propriété porte une version composée de l’heure locale et d’un identifiant stable de l’appareil. Deux appareils peuvent ainsi modifier des champs différents du même objet hors connexion sans perdre l’une des modifications. Si le même champ est modifié en concurrence, la version la plus récente gagne de façon déterministe. La réinitialisation complète demande une connexion afin d’éviter qu’une ancienne file locale ne recrée les données.
 
-Cette fonction nécessite la migration `supabase/migrations/20260920120000_add_crdt_sync.sql`, qui ajoute les métadonnées de version, la fonction de fusion sécurisée et la table à la publication Realtime.
+Cette fonction nécessite la migration `supabase/migrations/20260920120000_add_crdt_sync.sql`, qui ajoute les métadonnées de version, la fonction de fusion sécurisée et la table à la publication Realtime. Tant qu’elle n’est pas appliquée, le frontend conserve une compatibilité avec les écritures classiques du schéma précédent.
 
 ## Docker Compose
 
