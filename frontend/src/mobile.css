@@ -1,11 +1,13 @@
 @media(max-width:1150px){body{min-width:0}.search{min-width:0}}
 @media(max-width:800px){
   aside{height:calc(68px + env(safe-area-inset-bottom));padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
-  nav{grid-template-columns:repeat(6,minmax(0,1fr));gap:0}
+  nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+  nav button:nth-child(6),nav button:nth-child(7){display:none}
   nav button{min-width:0;padding:5px 2px;font-size:9px;align-items:center;justify-content:center}
   nav button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   main{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
   header{gap:8px}.headerActions{flex-shrink:0}.search input{min-width:0}
+  .mobileMenuWrap{display:block;position:relative}.mobileMenuTrigger{display:flex}.mobileMenu{position:absolute;right:0;top:45px;width:205px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 14px 35px var(--shadow);z-index:15}.mobileMenu>button,.mobileMenu>div>button{width:100%;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:8px;text-align:left;font-size:12px;cursor:pointer}.mobileMenu button:hover{background:color-mix(in srgb,var(--coral) 9%,var(--surface));color:var(--coral)}.mobileMenu svg{width:16px}.mobileMenu>div{border-top:1px solid var(--line);margin-top:5px;padding-top:7px}.mobileMenu b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:10px;font-weight:500;padding:5px 10px 7px}
   .pageTitle{min-width:0}.pageTitle h1{overflow-wrap:anywhere}
   .overlay{padding:12px}.modal,.detailModal{max-width:100%;max-height:calc(100dvh - 24px)}
 }
