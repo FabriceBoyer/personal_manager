@@ -38,6 +38,8 @@ export async function cachedRecords(ownerId) {
 
 export const putCachedRecord = (ownerId, record) => transaction('records', 'readwrite', store => request(store.put({key:cacheKey(ownerId,record.id),ownerId,record})));
 
+export const removeCachedRecord = (ownerId, id) => transaction('records', 'readwrite', store => request(store.delete(cacheKey(ownerId,id))));
+
 export async function replaceCachedRecords(ownerId, records) {
   const db = await database();
   const tx = db.transaction('records', 'readwrite');

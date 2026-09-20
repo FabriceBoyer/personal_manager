@@ -1,8 +1,8 @@
 import {supabase} from './supabase';
-import {cachedRecords, clearOwnerCache, nextVersion, observeVersions, putCachedRecord, queueChange, queuedChanges, removeQueuedChange, replaceCachedRecords} from './syncDb';
+import {cachedRecords, clearOwnerCache, nextVersion, observeVersions, putCachedRecord, queueChange, queuedChanges, removeCachedRecord, removeQueuedChange, replaceCachedRecords} from './syncDb';
 
-const fields = ['kind','title','description','status','date','endDate','subject','predicate','value','tags','relatedIds'];
-const columns = {kind:'kind',title:'title',description:'description',status:'status',date:'date',endDate:'end_date',subject:'subject',predicate:'predicate',value:'value',tags:'tags',relatedIds:'related_ids'};
+const fields = ['kind','title','description','status','date','endDate','subject','predicate','value','tags','relatedIds','archivedAt'];
+const columns = {kind:'kind',title:'title',description:'description',status:'status',date:'date',endDate:'end_date',subject:'subject',predicate:'predicate',value:'value',tags:'tags',relatedIds:'related_ids',archivedAt:'archived_at'};
 
 const fromRow = row => {
   observeVersions(row.sync_meta);
@@ -11,12 +11,13 @@ const fromRow = row => {
   status: row.status, date: row.date, endDate: row.end_date,
   subject: row.subject, predicate: row.predicate, value: row.value,
   tags: row.tags, relatedIds: row.related_ids,
+  archivedAt: row.archived_at,
   createdAt: row.created_at, updatedAt: row.updated_at,
   syncMeta: row.sync_meta || {}
   });
 };
 
-const normalize = (key, value) => value ?? (['tags','relatedIds'].includes(key) ? [] : ['date','endDate'].includes(key) ? null : '');
+const normalize = (key, value) => value ?? (['tags','relatedIds'].includes(key) ? [] : ['date','endDate','archivedAt'].includes(key) ? null : '');
 const toRow = record => Object.fromEntries([
   ['id', record.id],
   ...fields.filter(key => record[key] !== undefined).map(key => [columns[key], normalize(key, record[key])])
@@ -126,6 +127,17 @@ export async function updateRecord(id, changes) {
   return updated;
 }
 
+export const archiveRecord = (id, archived=true) => updateRecord(id,{archivedAt:archived?new Date().toISOString():null});
+
+export async function deleteRecord(id) {
+  const user=await currentUser();
+  if(!navigator.onLine)throw new Error('Reconnectez-vous à Internet avant de supprimer cet élément.');
+  await syncPendingRecords();
+  const {error}=await supabase.rpc('delete_record',{p_record_id:id,p_version:nextVersion()});
+  if(error)throw error;
+  await removeCachedRecord(user.id,id);
+}
+
 export async function resetRecords() {
   const user=await currentUser();
   if(!navigator.onLine)throw new Error('Reconnectez-vous à Internet avant de réinitialiser les données.');
@@ -147,6 +159,7 @@ export function subscribeToRecordChanges(ownerId,onChange,onStatus=()=>{}) {
   const channel=supabase.channel(`records:${ownerId}`)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'records',filter:`owner_id=eq.${ownerId}`},onChange)
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'records',filter:`owner_id=eq.${ownerId}`},onChange)
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'records'},onChange)
     .subscribe(status=>onStatus(status));
   return ()=>supabase.removeChannel(channel);
 }
