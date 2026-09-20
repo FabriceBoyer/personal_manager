@@ -12,7 +12,7 @@ npm ci
 npm run dev
 ```
 
-Ouvrez l'adresse affichée par Vite, créez un compte ou connectez-vous. Selon la configuration Auth du projet Supabase, la création d'un compte peut nécessiter une confirmation par courriel. Le schéma requis est dans `supabase/migrations/20260916195312_create_records.sql` et a été appliqué au projet Supabase.
+Ouvrez l'adresse affichée par Vite, créez un compte ou connectez-vous. Selon la configuration Auth du projet Supabase, la création d'un compte peut nécessiter une confirmation par courriel. Le schéma requis se trouve dans `supabase/migrations/`.
 
 Pour utiliser un autre projet Supabase, créez `frontend/.env.local` :
 
@@ -41,6 +41,14 @@ Le Client Secret reste uniquement dans Supabase et ne doit jamais être ajouté 
 ### Installation mobile
 
 Le site est une PWA installable. Sur Android et les navigateurs Chromium, ouvrez **Aide → Installer Mémoire** lorsque le bouton est proposé. Sur iPhone ou iPad, ouvrez le menu **Partager**, puis choisissez **Sur l’écran d’accueil**.
+
+### Synchronisation et mode hors connexion
+
+Les objets sont conservés dans IndexedDB sur chaque appareil. Une modification effectuée sans réseau est appliquée immédiatement dans l’interface et placée dans une file durable. À la reconnexion, elle est envoyée automatiquement à Supabase. Les changements distants arrivent en temps réel avec Supabase Realtime ; un rafraîchissement périodique couvre aussi les suppressions et les interruptions de canal.
+
+La fusion utilise un registre LWW par champ : chaque propriété porte une version composée de l’heure locale et d’un identifiant stable de l’appareil. Deux appareils peuvent ainsi modifier des champs différents du même objet hors connexion sans perdre l’une des modifications. Si le même champ est modifié en concurrence, la version la plus récente gagne de façon déterministe. La réinitialisation complète demande une connexion afin d’éviter qu’une ancienne file locale ne recrée les données.
+
+Cette fonction nécessite la migration `supabase/migrations/20260920120000_add_crdt_sync.sql`, qui ajoute les métadonnées de version, la fonction de fusion sécurisée et la table à la publication Realtime.
 
 ## Docker Compose
 
