@@ -95,9 +95,9 @@ function Overview({records,markDone,locale,onOpen,setView}){
   const recent=records.filter(r=>r.kind==='journal'||r.status==='done').slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,4);
   return <>
     <div className="stats">
-      <Stat icon={ListTodo} value={active.length} label={tr(locale,'openActions')} tone="coral" note={`${active.filter(r=>r.date?.startsWith(today)).length} ${tr(locale,'todayNote')}`}/>
-      <Stat icon={CalendarDays} value={records.filter(r=>r.date?.startsWith(today)).length} label={tr(locale,'todayEvents')} tone="blue" note={`${records.filter(r=>r.date?.startsWith(tomorrow)).length} ${tr(locale,'tomorrow')}`}/>
-      <Stat icon={BookOpen} value={records.filter(r=>r.kind==='fact').length} label={tr(locale,'facts')} tone="purple" note={tr(locale,'linked')}/>
+      <Stat icon={ListTodo} value={active.length} label={tr(locale,'openActions')} tone="coral" note={`${active.filter(r=>r.date?.startsWith(today)).length} ${tr(locale,'todayNote')}`} onClick={()=>setView('actions')}/>
+      <Stat icon={CalendarDays} value={records.filter(r=>r.date?.startsWith(today)).length} label={tr(locale,'todayEvents')} tone="blue" note={`${records.filter(r=>r.date?.startsWith(tomorrow)).length} ${tr(locale,'tomorrow')}`} onClick={()=>setView('calendar')}/>
+      <Stat icon={BookOpen} value={records.filter(r=>r.kind==='fact').length} label={tr(locale,'facts')} tone="purple" note={tr(locale,'linked')} onClick={()=>setView('knowledge')}/>
     </div>
     <div className="grid2">
       <Card title={tr(locale,'upcoming')} icon={Clock3} action={tr(locale,'viewCalendar')} onAction={()=>setView('calendar')}>
@@ -110,7 +110,7 @@ function Overview({records,markDone,locale,onOpen,setView}){
     <Card title={tr(locale,'connected')} icon={Link2}><KnowledgeStrip records={records} onOpen={onOpen}/></Card>
   </>
 }
-function Stat({icon:Icon,value,label,tone,note}){return <div className="stat"><div className={'iconBox '+tone}><Icon size={20}/></div><div><strong>{value}</strong><span>{label}</span><small>{note}</small></div></div>}
+function Stat({icon:Icon,value,label,tone,note,onClick}){return <button type="button" className="stat statLink" onClick={onClick}><div className={'iconBox '+tone}><Icon size={20}/></div><div><strong>{value}</strong><span>{label}</span><small>{note}</small></div><ChevronRight className="statArrow"/></button>}
 function Card({title,icon:Icon,action,onAction,children}){return <article className="card"><div className="cardHead"><h2><Icon size={18}/>{title}</h2>{action&&<button className="cardAction" onClick={onAction}>{action}<ChevronRight size={15}/></button>}</div>{children}</article>}
 function AgendaRow({r,markDone,locale,onOpen}){const meta=kindMeta[r.kind];const label=locale==='fr'?meta.label:{action:'Action',event:'Appointment',journal:'Journal',fact:'Knowledge'}[r.kind];return <div className="agendaRow entityClick" role="button" tabIndex="0" onClick={()=>onOpen(r)} onKeyDown={e=>e.key==='Enter'&&onOpen(r)}><button className={'check '+(r.status==='done'?'checked':'')} onClick={e=>{e.stopPropagation();r.kind==='action'&&markDone(r)}}>{r.status==='done'?<CheckCircle2 size={20}/>:<Circle size={20}/>}</button><div className="agendaText"><b>{r.title}</b><small><span className={'dot '+meta.color}></span>{label} · {dateLabel(r.date,locale)} {timeLabel(r.date)}</small></div><code>{r.id}</code></div>}
 function RecentRow({r,locale,onOpen}){return <div className="recentRow entityClick" role="button" tabIndex="0" onClick={()=>onOpen(r)} onKeyDown={e=>e.key==='Enter'&&onOpen(r)}><span className="timelineDot"><CheckCircle2 size={15}/></span><div><b>{r.title}</b><p>{r.description}</p><small>{dateLabel(r.date,locale)} · <code>{r.id}</code></small></div></div>}
